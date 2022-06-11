@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  djang_weather:
+    command: python DjangoShop/manage.py runserver 0.0.0.0:8000
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+    environment:
+      - WHEATHER_API_KEY = ${WHEATHER_API_KEY:?err}
+      - BASE_WHEATHER_API_URL = ${BASE_WHEATHER_API_URL:?err}
