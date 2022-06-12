@@ -1,14 +1,30 @@
 version: "3.8"
 services:
-  djang_weather:
+  djang_shop:
     command: python DjangoShop/manage.py runserver 0.0.0.0:8000
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - 8000:8000
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:?err}
+      - POSTGRES_USER=${POSTGRES_USER:?err}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err}
     volumes:
       - .:/app
+    container_name: django_app
+    depends_on:
+      - postgres_db
+  postgres_db:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
     environment:
-      - WHEATHER_API_KEY = ${WHEATHER_API_KEY:?err}
-      - BASE_WHEATHER_API_URL = ${BASE_WHEATHER_API_URL:?err}
+      - POSTGRES_DB=${POSTGRES_DB:?err}
+      - POSTGRES_USER=${POSTGRES_USER:?err}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?err}
+    container_name: postgres_db

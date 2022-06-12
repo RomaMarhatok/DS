@@ -6,7 +6,7 @@ WORKDIR /app
 
 COPY pyproject.toml /app/pyproject.toml
 
-RUN python -m pip install --upgrade pip \
+RUN python -m pip install -U pip \
     && pip install poetry \
     && poetry config virtualenvs.create false \
     && poetry install
