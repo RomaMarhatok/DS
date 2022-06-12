@@ -1,7 +1,6 @@
 version: "3.8"
 services:
   djang_shop:
-    command: python DjangoShop/manage.py runserver 0.0.0.0:8000
     build:
       context: .
       dockerfile: Dockerfile
