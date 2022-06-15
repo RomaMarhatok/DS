@@ -32,15 +32,19 @@ class Product(models.Model):
 
 class CategoryProduct(models.Model):
     product = models.ForeignKey(
-        Product, related_name="products", on_delete=models.SET_NULL, null=True
+        Product, related_name="category_product", on_delete=models.SET_NULL, null=True
     )
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(
+        Category, related_name="category_product", on_delete=models.SET_NULL, null=True
+    )
 
 
 class Attribute(models.Model):
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, related_name="attributes", on_delete=models.CASCADE
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
