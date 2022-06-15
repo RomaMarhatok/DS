@@ -1,5 +1,5 @@
 [flake8]
-ignore = F401,C405,E203
+ignore = F401,C405,E203,W503
 exclude = .git,__pycache__
 max-line-length = 100
 max-complexity = 18
