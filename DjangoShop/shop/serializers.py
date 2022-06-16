@@ -24,6 +24,8 @@ class AttributeSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    category_product = CategoryProductSerailizer(many=True, required=False)
+
     def __init__(self, *args, **kwargs):
         if (
             "data" in kwargs

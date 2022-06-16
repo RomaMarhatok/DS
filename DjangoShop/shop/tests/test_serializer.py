@@ -5,6 +5,7 @@ from shop.serializers import (
     CategoryProductSerailizer,
     CategoryAttributeSerializer,
     AttributeSerializer,
+    CategorySerializer,
 )
 from shop.models.product import (
     Product,
@@ -74,3 +75,14 @@ class TestAttributeSerializer:
         serializer: AttributeSerializer = AttributeSerializer(instance=attribute)
         assert "product" in serializer.data
         assert isinstance(serializer.data["product"], OrderedDict)
+
+
+class TestCategorySerializer:
+    @pytest.mark.django_db
+    def test_category_unique_value(self, category_fixture):
+        category: Category = category_fixture
+        serializer: CategorySerializer = CategorySerializer(instance=category)
+        assert "slug" in serializer.data
+        assert "name" in serializer.data
+        assert "category_product" in serializer.data
+        assert isinstance(serializer.data["category_product"], list)
