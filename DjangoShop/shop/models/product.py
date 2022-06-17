@@ -17,7 +17,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=100, default=None)
+    slug = models.SlugField(max_length=100, unique=True, default=None)
     price = models.DecimalField(
         validators=[MinValueValidator(limit_value=0)], max_digits=15, decimal_places=2
     )
