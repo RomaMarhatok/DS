@@ -14,6 +14,7 @@ class CategoryProductSerailizer(serializers.ModelSerializer):
         model = CategoryProduct
         fields = "__all__"
         depth = 1
+        lookup_field = "slug"
 
 
 class AttributeSerializer(serializers.ModelSerializer):
@@ -56,6 +57,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ["name", "slug", "price", "category_product", "attributes"]
+        lookup_field = "slug"
 
 
 class CategoryAttributeSerializer(serializers.ModelSerializer):

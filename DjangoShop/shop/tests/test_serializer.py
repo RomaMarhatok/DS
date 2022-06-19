@@ -1,6 +1,6 @@
 import pytest
 from typing import OrderedDict
-from shop.serializers import (
+from shop.serializers.product_serializers import (
     ProductSerializer,
     CategoryProductSerailizer,
     CategoryAttributeSerializer,
