@@ -4,9 +4,11 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./DjangoShop/Dockerfile
     ports:
       - 8000:8000
+    expose:
+      - 8000
     environment:
       - POSTGRES_DB=${POSTGRES_DB:?err}
       - POSTGRES_USER=${POSTGRES_USER:?err}
