@@ -19,7 +19,10 @@ class ProductViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, slug):
         if request.method == "GET":
-            serializer = ProductSerializer(Product.objects.get(slug=slug))
+            try:
+                serializer = ProductSerializer(Product.objects.get(slug=slug))
+            except Product.DoesNotExist:
+                return JsonResponse({"errors": ["object does not exist"]})
             return JsonResponse(serializer.data)
 
     def create(self, request):
@@ -46,19 +49,24 @@ class ProductViewSet(viewsets.ViewSet):
     def update(self, request, slug=None):
         if request.method == "PUT":
             try:
+                if not request.data["product"]:
+                    return JsonResponse({"errors": ["empty request body"]})
                 product: Product = Product.objects.get(slug=slug)
                 serializer = ProductSerializer(
                     data=request.data["product"], instance=product
                 )
+            except Product.DoesNotExist:
+                return JsonResponse({"errors": ["object does not exist"]})
             except KeyError:
                 return JsonResponse({"errors": ["bad parameters"]})
-            if not request.data["product"]:
-                return JsonResponse({"errors": ["empty request body"]})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return JsonResponse(serializer.data)
 
     def destroy(self, request, slug=None):
         if request.method == "DELETE":
-            instance = Product.objects.get(slug=slug).delete()
+            try:
+                instance = Product.objects.get(slug=slug).delete()
+            except Product.DoesNotExist:
+                return JsonResponse({"errors": ["object does not exist"]})
             return JsonResponse({"destroed": instance})
