@@ -7,6 +7,8 @@ from shop.serializers.product_serializers import (
     AttributeSerializer,
     CategorySerializer,
 )
+from shop.serializers.order_serializer import OrderSerialzier
+from shop.serializers.basket_serializer import BasketSerializer
 from shop.models.product import (
     Product,
     Category,
@@ -14,6 +16,8 @@ from shop.models.product import (
     Attribute,
     CategoryAttribute,
 )
+from shop.models.order import Order
+from shop.models.basket import Basket
 
 
 class TestProductSerializer:
@@ -34,8 +38,10 @@ class TestProductSerializer:
         CategoryProduct.objects.create(product=product, category=category)
         assert "attributes" in serializer.data
         assert "category_product" in serializer.data
+        assert "orders" in serializer.data
         assert isinstance(serializer.data["category_product"], list)
         assert isinstance(serializer.data["attributes"], list)
+        assert isinstance(serializer.data["orders"], list)
 
 
 class TestCategoryProductSerializer:
@@ -86,3 +92,21 @@ class TestCategorySerializer:
         assert "name" in serializer.data
         assert "category_product" in serializer.data
         assert isinstance(serializer.data["category_product"], list)
+
+
+class TestOrderSerializer:
+    @pytest.mark.django_db
+    def test_order_serializer(self, order_fixture):
+        order: Order = order_fixture
+        serializer: OrderSerialzier = OrderSerialzier(instance=order)
+        assert "product" in serializer.data
+        assert "user" in serializer.data
+
+
+class TestBasketSerializer:
+    @pytest.mark.django_db
+    def test_basket_serializer(self, basket_fixture):
+        basket: Basket = basket_fixture
+        serializer: BasketSerializer = BasketSerializer(instance=basket)
+        assert "product" in serializer.data
+        assert "user" in serializer.data
