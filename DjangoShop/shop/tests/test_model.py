@@ -1,4 +1,7 @@
 import pytest
+from django.contrib.auth.models import User
+from shop.models.order import Order
+from shop.models.basket import Basket
 from shop.models.product import Product, Category, CategoryProduct, Attribute
 from django.db.models.query import QuerySet
 
@@ -43,3 +46,22 @@ class TestAttribute:
         attribute: Attribute = attribute_fixture
         product: Product = attribute.product
         assert isinstance(product.attributes.all(), QuerySet)
+        assert product.attributes.all().count() == 1
+
+
+class TestOrder:
+    @pytest.mark.django_db
+    def test_related_name(self, order_fixture):
+        order: Order = order_fixture
+        user: User = order.user
+        assert isinstance(user.orders.all(), QuerySet)
+        assert user.orders.all().count() == 1
+
+
+class TestBasket:
+    @pytest.mark.django_db
+    def test_related_name(self, basket_fixture):
+        basket: Basket = basket_fixture
+        user: User = basket.user
+        assert isinstance(user.basket.all(), QuerySet)
+        assert user.basket.all().count() == 1
