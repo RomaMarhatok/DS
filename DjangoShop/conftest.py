@@ -1,5 +1,8 @@
 import pytest
+from django.contrib.auth.models import User
 from shop.models.product import Product, Category, Attribute, CategoryProduct
+from shop.models.order import Order
+from shop.models.basket import Basket
 from faker import Faker
 
 faker = Faker()
@@ -59,10 +62,59 @@ def attribute_fixture(product_fixture) -> Category:
 
 
 @pytest.fixture
-def category_porduct_fixture(category_fixture, product_fixture):
+def category_porduct_fixture(category_fixture, product_fixture) -> CategoryProduct:
     category: Category = category_fixture
     product: Product = product_fixture
     category_product = CategoryProduct.objects.create(
         category=category, product=product
     )
     return category_product
+
+
+# fixtures for User model
+@pytest.fixture
+def fake_user_fixture() -> dict:
+    return {"username": faker.name(), "password": faker.pystr()}
+
+
+@pytest.fixture
+def user_fixture(fake_user_fixture) -> User:
+    data: dict = fake_user_fixture
+    user: User = User.objects.create(**data)
+    return user
+
+
+# fixtures for Order model
+
+
+@pytest.fixture
+def faker_order_fixture(user_fixture, product_fixture) -> dict:
+    return {
+        "user": user_fixture,
+        "product": product_fixture,
+        "country": faker.country(),
+        "city": faker.city(),
+        "street": faker.street_address(),
+    }
+
+
+@pytest.fixture
+def order_fixture(faker_order_fixture) -> Order:
+    data: dict = faker_order_fixture
+    order: Order = Order.objects.create(**data)
+    return order
+
+
+# fixtures for Basket model
+
+
+@pytest.fixture
+def faker_basket_fixture(user_fixture, product_fixture) -> dict:
+    return {"user": user_fixture, "product": product_fixture}
+
+
+@pytest.fixture
+def basket_fixture(faker_basket_fixture) -> Basket:
+    data: dict = faker_basket_fixture
+    basket: Basket = Basket.objects.create(**data)
+    return basket
