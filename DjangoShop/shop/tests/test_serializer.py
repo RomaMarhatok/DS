@@ -38,10 +38,8 @@ class TestProductSerializer:
         CategoryProduct.objects.create(product=product, category=category)
         assert "attributes" in serializer.data
         assert "category_product" in serializer.data
-        assert "orders" in serializer.data
         assert isinstance(serializer.data["category_product"], list)
         assert isinstance(serializer.data["attributes"], list)
-        assert isinstance(serializer.data["orders"], list)
 
 
 class TestCategoryProductSerializer:

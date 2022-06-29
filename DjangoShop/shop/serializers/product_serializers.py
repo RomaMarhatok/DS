@@ -46,7 +46,6 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     category_product = CategoryProductSerailizer(many=True, required=False)
     attributes = AttributeSerializer(many=True, read_only=True)
-    orders = OrderSerialzier(many=True, required=False)
 
     def __init__(self, *args, **kwargs):
         if (
@@ -59,7 +58,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ["name", "slug", "price", "category_product", "attributes", "orders"]
+        fields = ["name", "slug", "price", "category_product", "attributes"]
         lookup_field = "slug"
 
 
