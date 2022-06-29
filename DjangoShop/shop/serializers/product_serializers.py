@@ -1,3 +1,4 @@
+from pkg_resources import require
 from rest_framework import serializers
 from shop.models.product import (
     Product,
@@ -7,6 +8,7 @@ from shop.models.product import (
     CategoryProduct,
 )
 from django.template.defaultfilters import slugify
+from shop.serializers.order_serializer import OrderSerialzier
 
 
 class CategoryProductSerailizer(serializers.ModelSerializer):
@@ -44,6 +46,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     category_product = CategoryProductSerailizer(many=True, required=False)
     attributes = AttributeSerializer(many=True, read_only=True)
+    orders = OrderSerialzier(many=True, required=False)
 
     def __init__(self, *args, **kwargs):
         if (
@@ -56,7 +59,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ["name", "slug", "price", "category_product", "attributes"]
+        fields = ["name", "slug", "price", "category_product", "attributes", "orders"]
         lookup_field = "slug"
 
 
