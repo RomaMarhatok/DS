@@ -42,10 +42,11 @@ def product_fixture() -> Product:
 
 
 @pytest.fixture
-def faker_attribute_fixture() -> dict:
+def faker_attribute_fixture(faker_product_fixture) -> dict:
     return {
         "name": faker.pystr(),
-        "attribute": faker.pystr(),
+        "value": faker.pystr(),
+        "product": faker_product_fixture,
     }
 
 
@@ -71,6 +72,11 @@ def category_porduct_fixture(category_fixture, product_fixture) -> CategoryProdu
     return category_product
 
 
+@pytest.fixture
+def faker_category_product_fixture(faker_product_fixture, faker_category_fixture):
+    return {"product": faker_product_fixture, "category": faker_category_fixture}
+
+
 # fixtures for User model
 @pytest.fixture
 def fake_user_fixture() -> dict:
@@ -80,6 +86,14 @@ def fake_user_fixture() -> dict:
 @pytest.fixture
 def user_fixture(fake_user_fixture) -> User:
     data: dict = fake_user_fixture
+    user: User = User.objects.create(**data)
+    return user
+
+
+@pytest.fixture
+def admin_user_fixture(fake_user_fixture) -> User:
+    data: dict = fake_user_fixture
+    data.update({"is_staff": True})
     user: User = User.objects.create(**data)
     return user
 
