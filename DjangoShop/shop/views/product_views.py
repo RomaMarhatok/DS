@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import HttpRequest, JsonResponse
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 from shop.models.product import Product, Category, CategoryProduct
@@ -18,7 +18,7 @@ class ProductViewSet(viewsets.ViewSet, PermissionMixin):
         "destroy": [IsAdminUser],
     }
 
-    def list(self, request):
+    def list(self, request: HttpRequest):
         if request.method == "GET":
             product_queryset: QuerySet = Product.objects.all()
             serializer: ProductSerializer = ProductSerializer(
@@ -26,7 +26,7 @@ class ProductViewSet(viewsets.ViewSet, PermissionMixin):
             )
             return JsonResponse(serializer.data, safe=False)
 
-    def retrieve(self, request, slug):
+    def retrieve(self, request: HttpRequest, slug):
         if request.method == "GET":
             try:
                 serializer = ProductSerializer(Product.objects.get(slug=slug))
@@ -34,7 +34,7 @@ class ProductViewSet(viewsets.ViewSet, PermissionMixin):
                 return JsonResponse({"errors": ["object does not exist"]}, status=400)
             return JsonResponse(serializer.data)
 
-    def create(self, request):
+    def create(self, request: HttpRequest):
         if request.method == "POST":
             try:
                 category = Category.objects.get(
@@ -56,7 +56,7 @@ class ProductViewSet(viewsets.ViewSet, PermissionMixin):
             CategoryProduct.objects.create(product=product, category=category)
             return JsonResponse(serializer.data)
 
-    def update(self, request, slug=None):
+    def update(self, request: HttpRequest, slug=None):
         if request.method == "PUT":
             try:
                 if not request.data["product"]:
@@ -73,7 +73,7 @@ class ProductViewSet(viewsets.ViewSet, PermissionMixin):
             serializer.save()
             return JsonResponse(serializer.data)
 
-    def destroy(self, request, slug=None):
+    def destroy(self, request: HttpRequest, slug=None):
         if request.method == "DELETE":
             try:
                 destroyed = Product.objects.get(slug=slug).delete()

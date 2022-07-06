@@ -1,11 +1,10 @@
-from django.http import JsonResponse
+from django.http import HttpRequest, JsonResponse
 from rest_framework import viewsets
 from shop.models.basket import Basket
 from shop.serializers.basket_serializer import BasketSerializer
 from rest_framework.permissions import IsAuthenticated
 from shop.models.product import Product
 from django.contrib.auth.models import User
-from django.template.defaultfilters import slugify
 from shop.mixins.view_mixins.permission_mixin import PermissionMixin
 from django.db.models import Q
 
@@ -19,13 +18,13 @@ class IventoryViewSet(viewsets.ViewSet, PermissionMixin):
         "destroy": [IsAuthenticated],
     }
 
-    def list(self, request):
+    def list(self, request: HttpRequest):
         if request.method == "GET":
             baskets_queryset = Basket.objects.filter(user__pk=request.user.pk).all()
             serializer = BasketSerializer(baskets_queryset, many=True)
             return JsonResponse(serializer.data, safe=False)
 
-    def create(self, request, slug=None):
+    def create(self, request: HttpRequest, slug=None):
         if request.method == "POST":
             try:
                 product: Product = Product.objects.get(slug=slug)
@@ -41,7 +40,7 @@ class IventoryViewSet(viewsets.ViewSet, PermissionMixin):
             except KeyError:
                 return JsonResponse({"errors": ["bad request parameters"]}, status=400)
 
-    def destroy(self, request, slug=None):
+    def destroy(self, request: HttpRequest, slug=None):
         if request.method == "DELETE":
             try:
                 instance: Basket = Basket.objects.get(
