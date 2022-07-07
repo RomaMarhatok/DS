@@ -1,11 +1,19 @@
-from django.http import HttpRequest, JsonResponse
+from django.http import (
+    HttpRequest,
+    HttpResponseBadRequest,
+    JsonResponse,
+)
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAdminUser,
+)
 from shop.models.product import Product, Category, CategoryProduct
 from shop.serializers.product_serializers import ProductSerializer
 from django.db.models import QuerySet
 from django.template.defaultfilters import slugify
-from ..mixins.view_mixins.permission_mixin import PermissionMixin
+from shop.mixins.view_mixins.permission_mixin import PermissionMixin
 
 
 class ProductViewSet(viewsets.ViewSet, PermissionMixin):
@@ -26,31 +34,24 @@ class ProductViewSet(viewsets.ViewSet, PermissionMixin):
             )
             return JsonResponse(serializer.data, safe=False)
 
-    def retrieve(self, request: HttpRequest, slug):
+    def retrieve(self, request: HttpRequest, slug=None):
         if request.method == "GET":
-            try:
-                serializer = ProductSerializer(Product.objects.get(slug=slug))
-            except Product.DoesNotExist:
-                return JsonResponse({"errors": ["object does not exist"]}, status=400)
+            product: Product = get_object_or_404(Product, slug=slug)
+            serializer = ProductSerializer(instance=product)
             return JsonResponse(serializer.data)
 
     def create(self, request: HttpRequest):
         if request.method == "POST":
-            try:
-                category = Category.objects.get(
-                    slug=slugify(request.data["category"]["name"])
-                )
-            except Category.DoesNotExist:
-                return JsonResponse({"errors": ["category doesn't exist"]}, status=400)
-            product_data = request.data["product"]
-            serializer = ProductSerializer(data=product_data)
+            category: Category = get_object_or_404(
+                Category, slug=slugify(request.data["category"])
+            )
+            serializer = ProductSerializer(data=request.data["product"])
             if not serializer.is_valid(raise_exception=True):
-                return JsonResponse(
+                return HttpResponseBadRequest(
                     {
                         "is_valid": serializer.is_valid(raise_exception=True),
                         "errors": serializer.errors,
                     },
-                    status=400,
                 )
             product = serializer.save()
             CategoryProduct.objects.create(product=product, category=category)
@@ -59,26 +60,20 @@ class ProductViewSet(viewsets.ViewSet, PermissionMixin):
     def update(self, request: HttpRequest, slug=None):
         if request.method == "PUT":
             try:
-                if not request.data["product"]:
-                    return JsonResponse({"errors": ["empty request body"]}, status=400)
-                product: Product = Product.objects.get(slug=slug)
+                product: Product = get_object_or_404(Product, slug=slug)
                 serializer = ProductSerializer(
                     data=request.data["product"], instance=product
                 )
-            except Product.DoesNotExist:
-                return JsonResponse({"errors": ["object does not exist"]}, status=400)
             except KeyError:
-                return JsonResponse({"errors": ["bad parameters"]}, status=400)
+                return HttpResponseBadRequest("bad request")
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return JsonResponse(serializer.data)
+            return JsonResponse(serializer.data, status=200)
 
     def destroy(self, request: HttpRequest, slug=None):
         if request.method == "DELETE":
-            try:
-                destroyed = Product.objects.get(slug=slug).delete()
-            except Product.DoesNotExist:
-                return JsonResponse({"errors": ["object does not exist"]}, status=400)
+            product: Product = get_object_or_404(Product, slug=slug)
+            destroyed = product.delete()
             return JsonResponse({"destroyed ": destroyed})
 
     def get_permissions(self):
