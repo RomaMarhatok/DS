@@ -1,4 +1,9 @@
-from django.http import HttpRequest, JsonResponse
+from django.http import (
+    HttpRequest,
+    HttpResponseBadRequest,
+    JsonResponse,
+)
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from shop.models.basket import Basket
 from shop.serializers.basket_serializer import BasketSerializer
@@ -7,6 +12,7 @@ from shop.models.product import Product
 from django.contrib.auth.models import User
 from shop.mixins.view_mixins.permission_mixin import PermissionMixin
 from django.db.models import Q
+from django.template.defaultfilters import slugify
 
 
 class IventoryViewSet(viewsets.ViewSet, PermissionMixin):
@@ -24,33 +30,26 @@ class IventoryViewSet(viewsets.ViewSet, PermissionMixin):
             serializer = BasketSerializer(baskets_queryset, many=True)
             return JsonResponse(serializer.data, safe=False)
 
-    def create(self, request: HttpRequest, slug=None):
+    def create(self, request: HttpRequest):
         if request.method == "POST":
             try:
-                product: Product = Product.objects.get(slug=slug)
-                user: User = User.objects.get(pk=request.user.pk)
+                product = get_object_or_404(Product, slug=slugify(request.data["name"]))
+                user: User = get_object_or_404(User, pk=request.user.pk)
                 basket: Basket = Basket.objects.create(product=product, user=user)
                 serializer = BasketSerializer(instance=basket)
-                return JsonResponse(serializer.data, status=200)
-
-            except User.DoesNotExist:
-                return JsonResponse({"errors": ["user does not exist"]}, status=404)
-            except Product.DoesNotExist:
-                return JsonResponse({"errors": ["object does not exist"]}, status=404)
+                return JsonResponse(serializer.data["product"], status=200)
             except KeyError:
-                return JsonResponse({"errors": ["bad request parameters"]}, status=400)
+                return HttpResponseBadRequest()
 
     def destroy(self, request: HttpRequest, slug=None):
         if request.method == "DELETE":
             try:
-                instance: Basket = Basket.objects.get(
-                    Q(product__slug=slug) & Q(user__pk=request.user.pk)
+                basket: Basket = get_object_or_404(
+                    Basket, product__slug=slug, user__pk=request.user.pk
                 )
-                destroyed = instance.delete()
-            except Basket.DoesNotExist:
-                return JsonResponse({"errors": ["object does not exist"]}, status=404)
+                destroyed = basket.delete()
             except KeyError:
-                return JsonResponse({"errors": ["bad parameters"]}, status=400)
+                return HttpResponseBadRequest()
             return JsonResponse({"destroyed ": destroyed}, status=200)
 
     def get_permissions(self):
